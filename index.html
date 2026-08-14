@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tính tiền nhà trọ Hiếu Mai</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#fff; --line:#e2e8f0; --line2:#cbd5e1;
+    --ink:#0f172a; --muted:#64748b; --brand:#1d4ed8; --brand2:#eff6ff;
+    --ok:#059669; --warn:#b45309; --bad:#dc2626; --okbg:#ecfdf5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+       font-size:14px;line-height:1.45}
+  .wrap{max-width:1500px;margin:0 auto;padding:16px}
+  header.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:14px}
+  header.top h1{font-size:20px;margin:0;font-weight:700}
+  header.top .sub{color:var(--muted);font-size:12.5px}
+  .spacer{flex:1}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line2);
+         background:#fff;padding:7px 12px;color:var(--ink)}
+  button:hover{background:#f1f5f9}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+  button.primary:hover{background:#1e40af}
+  button.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  button.ghost:hover{background:#e2e8f0;color:var(--ink)}
+  button.danger{color:var(--bad);border-color:#fecaca;background:#fef2f2}
+  button.sm{padding:3px 8px;font-size:12.5px}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:-1px}
+  .tab{padding:8px 14px;border:1px solid var(--line);border-bottom:none;background:#e8edf4;
+       border-radius:9px 9px 0 0;font-weight:600;color:var(--muted);cursor:pointer;font-size:13.5px}
+  .tab.active{background:#fff;color:var(--brand);box-shadow:inset 0 3px 0 var(--brand)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+  .panel h3{margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+
+  .grid{display:grid;gap:12px}
+  .g-total{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+  .fld label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600}
+  input[type=text],input[type=number],select{
+    width:100%;padding:7px 9px;border:1px solid var(--line2);border-radius:7px;font:inherit;background:#fff}
+  input:focus,select:focus{outline:2px solid #bfdbfe;outline-offset:-1px;border-color:var(--brand)}
+  input.num{text-align:right;font-variant-numeric:tabular-nums}
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px;background:#fff}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  thead th{background:#f8fafc;position:sticky;top:0;font-size:11.5px;text-transform:uppercase;
+           letter-spacing:.3px;color:var(--muted);border-bottom:1px solid var(--line2)}
+  thead tr.grp th{background:#eef2f7;font-size:11px;text-align:center;color:#475569}
+  th.l,td.l{text-align:left}
+  tbody tr:hover{background:#fbfdff}
+  td.room{font-weight:700}
+  td.sum{font-weight:700;color:var(--brand);background:#f8fbff}
+  tfoot td{background:#f1f5f9;font-weight:700;border-top:2px solid var(--line2)}
+  .sep-l{border-left:1px solid var(--line)}
+  td input{min-width:88px;padding:5px 7px}
+  td input[type=text].tenant{min-width:130px;text-align:left}
+  .muted{color:var(--muted)}
+  .chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .chip.auto{background:#f1f5f9;color:#64748b}
+
+  .alert{margin-top:12px;padding:10px 12px;border-radius:9px;font-size:13px;display:none}
+  .alert.show{display:block}
+  .alert.bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+  .alert.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+
+  .recon{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .rc{flex:1;min-width:230px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+  .rc b{display:block;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+  .rc span{font-size:13px}
+
+  .cfgtbl th,.cfgtbl td{white-space:nowrap}
+  .cfgtbl input{min-width:110px}
+  details.cfg summary{cursor:pointer;font-weight:600;color:var(--brand);padding:4px 0;list-style:none}
+  details.cfg summary::-webkit-details-marker{display:none}
+  details.cfg summary::before{content:"▸ ";}
+  details.cfg[open] summary::before{content:"▾ ";}
+
+  .paid-yes{color:var(--ok);font-weight:700}
+  .cloud{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+         border-radius:999px;padding:5px 12px 5px 10px;font-size:12.5px;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:50%;background:#cbd5e1;flex:none}
+  .dot.on{background:var(--ok);box-shadow:0 0 0 3px #d1fae5}
+  .dot.sync{background:#f59e0b;box-shadow:0 0 0 3px #fef3c7}
+  .dot.off{background:#94a3b8}
+  .dot.err{background:var(--bad);box-shadow:0 0 0 3px #fee2e2}
+  .empty{padding:50px 20px;text-align:center;color:var(--muted)}
+
+  /* ---------- IN HÓA ĐƠN ---------- */
+  #printArea{display:none}
+  @media print{
+    body{background:#fff}
+    .wrap{display:none !important}
+    #printArea{display:block}
+    .bill{page-break-after:always}
+    .bill:last-child{page-break-after:auto}
+  }
+  .bill{max-width:700px;margin:0 auto 30px;padding:24px;font-size:13.5px;color:#000}
+  .bill h2{margin:0;font-size:19px;text-align:center;text-transform:uppercase;letter-spacing:.5px}
+  .bill .hh{text-align:center;font-weight:700;font-size:15px}
+  .bill .per{text-align:center;color:#333;margin:4px 0 16px}
+  .bill .meta{display:flex;justify-content:space-between;margin-bottom:10px}
+  .bill table{width:100%;min-width:0;border-collapse:collapse;background:#fff}
+  .bill th,.bill td{border:1px solid #333;padding:6px 8px;font-size:13px}
+  .bill th{background:#eee;text-align:center}
+  .bill .tt{font-weight:700;font-size:15px;background:#f3f3f3}
+  .bill .words{font-style:italic;margin-top:8px}
+  .bill .sign{display:flex;justify-content:space-between;margin-top:34px;text-align:center}
+  .bill .sign div{width:45%}
+  .bill .sign i{display:block;font-size:12px;color:#333}
+  .bill .sign b{display:block;margin-top:52px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Tính tiền nhà trọ Hiếu Mai</h1>
+      <div class="sub" id="saveInfo">Dữ liệu tự lưu trên máy này</div>
+    </div>
+    <div class="spacer"></div>
+    <div id="cloudBox" class="cloud">
+      <span id="cloudDot" class="dot off"></span>
+      <span id="cloudMsg">Đang kết nối…</span>
+      <button class="sm" id="cloudBtn" style="display:none"></button>
+    </div>
+    <button onclick="printAll()">🖨️ In tất cả phiếu thu</button>
+    <button onclick="exportJSON()">⬇️ Xuất file backup</button>
+    <button onclick="document.getElementById('fileIn').click()">⬆️ Nhập file backup</button>
+    <input type="file" id="fileIn" accept="application/json" style="display:none" onchange="importJSON(this)">
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="card" id="main"></div>
+
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* =======================================================================
+   DỮ LIỆU & CẤU HÌNH
+   ======================================================================= */
+const KEY = 'nhatro_hieumai_v1';
+const ROOMS = [1,2,3,4,5];
+const METER_ROOMS = [2,3,4,5];   // phòng có đồng hồ riêng
+
+function defaultConfig(){
+  return {
+    elecPrice: 3000,
+    trash: 30000,
+    rent:       {1:3500000, 2:1400000, 3:1400000, 4:1400000, 5:1600000},
+    waterPrice: {1:11000,   2:19000,   3:19000,   4:19000,   5:19000}
+  };
+}
+
+/* Trạng thái trống dùng cho lần mở đầu tiên. KHÔNG chứa dữ liệu thật:
+   số liệu thật nằm trên Firestore riêng tư, tải về sau khi đăng nhập Google. */
+const SEED = {
+  "version": 1,
+  "tenants": {"1":"","2":"","3":"","4":"","5":""},
+  "months": [{
+    "id":"start","m":8,"y":2026,
+    "totalMode":"usage","totalElec":null,"totalWater":null,
+    "totalElecPrev":null,"totalWaterPrev":null,
+    "readings":{
+      "2":{"e0":null,"e1":null,"w0":null,"w1":null},
+      "3":{"e0":null,"e1":null,"w0":null,"w1":null},
+      "4":{"e0":null,"e1":null,"w0":null,"w1":null},
+      "5":{"e0":null,"e1":null,"w0":null,"w1":null}
+    },
+    "paid":{"1":false,"2":false,"3":false,"4":false,"5":false},
+    "config":{"elecPrice":3000,"trash":30000,
+      "rent":{"1":3500000,"2":1400000,"3":1400000,"4":1400000,"5":1600000},
+      "waterPrice":{"1":11000,"2":19000,"3":19000,"4":19000,"5":19000}},
+    "note":""
+  }],
+  "activeId":"start",
+  "updatedAt": 0
+};
+
+function defaultState(){
+  return JSON.parse(JSON.stringify(SEED));
+}
+
+function newMonth(st, m, y){
+  const prev = st.months.length ? st.months[st.months.length-1] : null;
+  const cfg  = prev ? JSON.parse(JSON.stringify(prev.config)) : defaultConfig();
+  const mo = {
+    id: 'm' + Math.random().toString(36).slice(2,9),
+    m: m, y: y,
+    totalMode: 'usage',          // 'usage' = số dùng trong tháng | 'meter' = chỉ số đồng hồ
+    totalElec: null, totalWater: null,          // số dùng HOẶC chỉ số mới
+    totalElecPrev: null, totalWaterPrev: null,  // chỉ dùng khi totalMode='meter'
+    readings: {}, paid: {}, config: cfg, note: ''
+  };
+  METER_ROOMS.forEach(r=>{
+    const p = prev ? prev.readings[r] : null;
+    mo.readings[r] = { e0: p ? num(p.e1) : null, e1: null, w0: p ? num(p.w1) : null, w1: null };
+  });
+  if (prev && prev.totalMode === 'meter') mo.totalElecPrev = num(prev.totalElec), mo.totalWaterPrev = num(prev.totalWater);
+  ROOMS.forEach(r=> mo.paid[r] = false);
+  return mo;
+}
+
+let S = load() || defaultState();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return null;
+    const o = JSON.parse(raw);
+    if(!o || !o.months || !o.months.length) return null;
+    return o;
+  }catch(e){ return null; }
+}
+let saveWarned = false;
+function save(opts){
+  if(!(opts && opts.fromCloud)){
+    S.updatedAt = Date.now();
+    if(window.cloudPush) window.cloudPush();
+  }
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){
+    if(!saveWarned){
+      saveWarned = true;
+      document.getElementById('saveInfo').innerHTML =
+        '<span style="color:#b45309">⚠️ Trình duyệt không cho lưu tự động — nhớ bấm "Xuất file backup" trước khi đóng.</span>';
+    }
+  }
+}
+
+/* =======================================================================
+   TIỆN ÍCH
+   ======================================================================= */
+function num(v){ if(v===''||v===null||v===undefined) return null; const n=Number(v); return isNaN(n)?null:n; }
+function vnd(n){ return (Math.round(n||0)).toLocaleString('vi-VN'); }
+function nz(n){ return n===null||n===undefined ? 0 : n; }
+function activeMonth(){ return S.months.find(x=>x.id===S.activeId) || S.months[0]; }
+function label(mo){ return 'Tháng ' + String(mo.m).padStart(2,'0') + '/' + mo.y; }
+
+/* Đọc số tiền thành chữ */
+const DV=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+function read3(n, full){
+  const tr=Math.floor(n/100), ch=Math.floor((n%100)/10), dv=n%10; let s='';
+  if(full||tr>0){ s+=DV[tr]+' trăm'; if(ch===0&&dv>0) s+=' lẻ'; }
+  if(ch>1){ s+=' '+DV[ch]+' mươi'; if(dv===1)s+=' mốt'; else if(dv===5)s+=' lăm'; else if(dv>0)s+=' '+DV[dv]; }
+  else if(ch===1){ s+=' mười'; if(dv===5)s+=' lăm'; else if(dv>0)s+=' '+DV[dv]; }
+  else if(dv>0){ s+=' '+DV[dv]; }
+  return s.trim();
+}
+function readVND(n){
+  n = Math.round(n||0);
+  if(n<=0) return 'Không đồng';
+  const units=['','nghìn','triệu','tỷ'], g=[]; let x=n;
+  while(x>0){ g.push(x%1000); x=Math.floor(x/1000); }
+  let s='';
+  for(let i=g.length-1;i>=0;i--){
+    if(g[i]===0) continue;
+    s += (s?' ':'') + read3(g[i], i<g.length-1) + (units[i]?' '+units[i]:'');
+  }
+  return s.charAt(0).toUpperCase()+s.slice(1)+' đồng';
+}
+
+/* =======================================================================
+   TÍNH TOÁN  — trái tim của ứng dụng
+   ======================================================================= */
+function compute(mo){
+  const c = mo.config;
+  const res = { rooms:{}, warn:[], totalHouseElec:null, totalHouseWater:null };
+
+  // Số điện / nước nhà tổng đã dùng trong tháng
+  if(mo.totalMode === 'meter'){
+    res.totalHouseElec  = (num(mo.totalElec)!==null && num(mo.totalElecPrev)!==null)  ? num(mo.totalElec)-num(mo.totalElecPrev)   : null;
+    res.totalHouseWater = (num(mo.totalWater)!==null && num(mo.totalWaterPrev)!==null)? num(mo.totalWater)-num(mo.totalWaterPrev) : null;
+  }else{
+    res.totalHouseElec  = num(mo.totalElec);
+    res.totalHouseWater = num(mo.totalWater);
+  }
+
+  // Phòng 2,3,4,5: chỉ số mới − chỉ số cũ
+  let sumE = 0, sumW = 0, allE = true, allW = true;
+  METER_ROOMS.forEach(r=>{
+    const d = mo.readings[r] || {};
+    const e = (num(d.e1)!==null && num(d.e0)!==null) ? num(d.e1)-num(d.e0) : null;
+    const w = (num(d.w1)!==null && num(d.w0)!==null) ? num(d.w1)-num(d.w0) : null;
+    if(e===null) allE=false; else sumE+=e;
+    if(w===null) allW=false; else sumW+=w;
+    if(e!==null && e<0) res.warn.push('Phòng '+r+': chỉ số điện mới nhỏ hơn chỉ số cũ.');
+    if(w!==null && w<0) res.warn.push('Phòng '+r+': chỉ số nước mới nhỏ hơn chỉ số cũ.');
+    res.rooms[r] = { elec:e, water:w };
+  });
+  res.sumE = allE ? sumE : null;
+  res.sumW = allW ? sumW : null;
+
+  // Phòng 1 = nhà tổng − tổng 4 phòng còn lại
+  const e1 = (res.totalHouseElec!==null  && res.sumE!==null) ? res.totalHouseElec  - res.sumE : null;
+  const w1 = (res.totalHouseWater!==null && res.sumW!==null) ? res.totalHouseWater - res.sumW : null;
+  res.rooms[1] = { elec:e1, water:w1 };
+  if(e1!==null && e1<0) res.warn.push('Điện phòng 1 âm — kiểm tra lại số nhà tổng hoặc chỉ số các phòng.');
+  if(w1!==null && w1<0) res.warn.push('Nước phòng 1 âm — kiểm tra lại số nhà tổng hoặc chỉ số các phòng.');
+
+  // Thành tiền
+  let grand = 0, grandPaid = 0;
+  ROOMS.forEach(r=>{
+    const x = res.rooms[r];
+    x.elecMoney  = nz(x.elec)  * c.elecPrice;
+    x.waterMoney = nz(x.water) * c.waterPrice[r];
+    x.rent  = c.rent[r];
+    x.trash = c.trash;
+    x.total = x.rent + x.trash + x.elecMoney + x.waterMoney;
+    grand += x.total;
+    if(mo.paid[r]) grandPaid += x.total;
+  });
+  res.grand = grand;
+  res.grandPaid = grandPaid;
+  res.grandDue = grand - grandPaid;
+  return res;
+}
+
+/* =======================================================================
+   GIAO DIỆN
+   ======================================================================= */
+function renderTabs(){
+  const t = document.getElementById('tabs');
+  t.innerHTML = S.months.map(m=>
+    `<div class="tab ${m.id===S.activeId?'active':''}" onclick="switchMonth('${m.id}')">${label(m)}</div>`
+  ).join('') + `<button class="primary" style="margin-left:8px" onclick="addMonth()">＋ Tạo tháng mới</button>`;
+}
+
+function renderMain(){
+  const mo = activeMonth();
+  if(!mo){ document.getElementById('main').innerHTML = '<div class="empty">Chưa có tháng nào. Bấm "Tạo tháng mới".</div>'; return; }
+  const c = mo.config;
+  const meter = mo.totalMode === 'meter';
+
+  const totalBox = `
+  <div class="panel">
+    <h3>1 · Số liệu nhà tổng — ${label(mo)}</h3>
+    <div class="grid g-total">
+      <div class="fld">
+        <label>Kiểu nhập nhà tổng</label>
+        <select onchange="setF('totalMode',this.value,true)">
+          <option value="usage" ${!meter?'selected':''}>Số đã dùng trong tháng</option>
+          <option value="meter" ${meter?'selected':''}>Chỉ số đồng hồ (cũ → mới)</option>
+        </select>
+      </div>
+      ${meter?`
+      <div class="fld"><label>Chỉ số điện cũ (kWh)</label>
+        <input class="num" type="number" step="any" value="${mo.totalElecPrev??''}" oninput="setF('totalElecPrev',this.value)"></div>`:''}
+      <div class="fld"><label>${meter?'Chỉ số điện mới (kWh)':'Tổng điện đã dùng (kWh)'}</label>
+        <input class="num" type="number" step="any" value="${mo.totalElec??''}" oninput="setF('totalElec',this.value)"></div>
+      ${meter?`
+      <div class="fld"><label>Chỉ số nước cũ (m³)</label>
+        <input class="num" type="number" step="any" value="${mo.totalWaterPrev??''}" oninput="setF('totalWaterPrev',this.value)"></div>`:''}
+      <div class="fld"><label>${meter?'Chỉ số nước mới (m³)':'Tổng nước đã dùng (m³)'}</label>
+        <input class="num" type="number" step="any" value="${mo.totalWater??''}" oninput="setF('totalWater',this.value)"></div>
+    </div>
+    <div class="recon">
+      <div class="rc"><b>Đối chiếu điện</b><span id="rcE">—</span></div>
+      <div class="rc"><b>Đối chiếu nước</b><span id="rcW">—</span></div>
+      <div class="rc"><b>Tổng thu tháng này</b><span id="rcM">—</span></div>
+    </div>
+    <div class="alert bad" id="alertBox"></div>
+  </div>`;
+
+  const rows = ROOMS.map(r=>{
+    const d = mo.readings[r];
+    const auto = r===1;
+    return `<tr>
+      <td class="l room">Phòng ${r}</td>
+      <td class="l"><input class="tenant" type="text" placeholder="Tên người thuê" value="${escapeHtml(S.tenants[r]||'')}" oninput="setTenant(${r},this.value)"></td>
+      <td class="sep-l">${auto?'<span class="chip auto">nhà tổng</span>':`<input class="num" type="number" step="any" value="${d.e0??''}" oninput="setR(${r},'e0',this.value)">`}</td>
+      <td>${auto?'<span class="chip auto">− Σ P2–5</span>':`<input class="num" type="number" step="any" value="${d.e1??''}" oninput="setR(${r},'e1',this.value)">`}</td>
+      <td id="eU${r}">—</td>
+      <td id="eM${r}">—</td>
+      <td class="sep-l">${auto?'<span class="chip auto">nhà tổng</span>':`<input class="num" type="number" step="any" value="${d.w0??''}" oninput="setR(${r},'w0',this.value)">`}</td>
+      <td>${auto?'<span class="chip auto">− Σ P2–5</span>':`<input class="num" type="number" step="any" value="${d.w1??''}" oninput="setR(${r},'w1',this.value)">`}</td>
+      <td id="wU${r}">—</td>
+      <td id="wM${r}">—</td>
+      <td class="sep-l" id="rt${r}">—</td>
+      <td id="tr${r}">—</td>
+      <td class="sum" id="tt${r}">—</td>
+      <td class="sep-l"><input type="checkbox" ${mo.paid[r]?'checked':''} onchange="setPaid(${r},this.checked)"></td>
+      <td><button class="sm" onclick="printOne(${r})">In</button></td>
+    </tr>`;
+  }).join('');
+
+  const table = `
+  <div class="panel">
+    <h3>2 · Bảng tính tiền từng phòng</h3>
+    <div class="tblwrap"><table>
+      <thead>
+        <tr class="grp">
+          <th colspan="2"></th>
+          <th colspan="4" class="sep-l">ĐIỆN — ${vnd(c.elecPrice)} đ/kWh</th>
+          <th colspan="4" class="sep-l">NƯỚC</th>
+          <th colspan="2" class="sep-l">CỐ ĐỊNH</th>
+          <th></th><th colspan="2" class="sep-l"></th>
+        </tr>
+        <tr>
+          <th class="l">Phòng</th><th class="l">Người thuê</th>
+          <th class="sep-l">CS cũ</th><th>CS mới</th><th>kWh</th><th>Tiền điện</th>
+          <th class="sep-l">CS cũ</th><th>CS mới</th><th>m³</th><th>Tiền nước</th>
+          <th class="sep-l">Tiền thuê</th><th>Rác</th>
+          <th>TỔNG PHẢI THU</th>
+          <th class="sep-l">Đã thu</th><th>Phiếu</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td class="l" colspan="2">TỔNG CỘNG</td>
+        <td class="sep-l" colspan="2"></td><td id="fEU">—</td><td id="fEM">—</td>
+        <td class="sep-l" colspan="2"></td><td id="fWU">—</td><td id="fWM">—</td>
+        <td class="sep-l" id="fRT">—</td><td id="fTR">—</td>
+        <td class="sum" id="fTT">—</td>
+        <td class="sep-l" colspan="2" id="fPaid">—</td>
+      </tr></tfoot>
+    </table></div>
+  </div>`;
+
+  const cfg = `
+  <div class="panel">
+    <details class="cfg">
+      <summary>3 · Bảng giá &amp; tiền thuê áp dụng cho ${label(mo)} (sửa được — không ảnh hưởng tháng khác)</summary>
+      <div class="grid g-total" style="margin:12px 0">
+        <div class="fld"><label>Giá điện (đ/kWh) — áp dụng cả 5 phòng</label>
+          <input class="num" type="number" step="any" value="${c.elecPrice}" oninput="setC('elecPrice',this.value)"></div>
+        <div class="fld"><label>Tiền rác mỗi phòng (đ)</label>
+          <input class="num" type="number" step="any" value="${c.trash}" oninput="setC('trash',this.value)"></div>
+      </div>
+      <div class="tblwrap"><table class="cfgtbl" style="min-width:560px">
+        <thead><tr><th class="l">Phòng</th><th>Tiền thuê (đ)</th><th>Giá nước (đ/m³)</th></tr></thead>
+        <tbody>${ROOMS.map(r=>`<tr>
+          <td class="l room">Phòng ${r}</td>
+          <td><input class="num" type="number" step="any" value="${c.rent[r]}" oninput="setCR('rent',${r},this.value)"></td>
+          <td><input class="num" type="number" step="any" value="${c.waterPrice[r]}" oninput="setCR('waterPrice',${r},this.value)"></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="danger" onclick="delMonth()">🗑 Xóa ${label(mo)}</button>
+      </div>
+    </details>
+  </div>`;
+
+  document.getElementById('main').innerHTML = totalBox + table + cfg;
+  recalc();
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* Chỉ cập nhật các ô kết quả — không vẽ lại input (giữ nguyên con trỏ đang gõ) */
+function recalc(){
+  const mo = activeMonth(); if(!mo) return;
+  const R = compute(mo);
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent = v; };
+
+  let tEU=0,tEM=0,tWU=0,tWM=0,tRT=0,tTR=0;
+  ROOMS.forEach(r=>{
+    const x = R.rooms[r];
+    set('eU'+r, x.elec===null?'—':vnd(x.elec));
+    set('wU'+r, x.water===null?'—':vnd(x.water));
+    set('eM'+r, vnd(x.elecMoney));
+    set('wM'+r, vnd(x.waterMoney));
+    set('rt'+r, vnd(x.rent));
+    set('tr'+r, vnd(x.trash));
+    set('tt'+r, vnd(x.total));
+    tEU+=nz(x.elec); tEM+=x.elecMoney; tWU+=nz(x.water); tWM+=x.waterMoney; tRT+=x.rent; tTR+=x.trash;
+    const cell = document.getElementById('tt'+r);
+    if(cell) cell.style.color = (x.elec!==null&&x.elec<0)||(x.water!==null&&x.water<0) ? 'var(--bad)' : '';
+  });
+  set('fEU',vnd(tEU)); set('fEM',vnd(tEM)); set('fWU',vnd(tWU)); set('fWM',vnd(tWM));
+  set('fRT',vnd(tRT)); set('fTR',vnd(tTR)); set('fTT',vnd(R.grand));
+  set('fPaid','Đã thu '+vnd(R.grandPaid)+' · Còn '+vnd(R.grandDue));
+
+  set('rcE', R.totalHouseElec===null||R.sumE===null ? 'Chưa đủ số liệu'
+      : `Nhà tổng ${vnd(R.totalHouseElec)} kWh − P2–5 ${vnd(R.sumE)} kWh = P1 ${vnd(R.rooms[1].elec)} kWh`);
+  set('rcW', R.totalHouseWater===null||R.sumW===null ? 'Chưa đủ số liệu'
+      : `Nhà tổng ${vnd(R.totalHouseWater)} m³ − P2–5 ${vnd(R.sumW)} m³ = P1 ${vnd(R.rooms[1].water)} m³`);
+  set('rcM', vnd(R.grand)+' đ  ·  đã thu '+vnd(R.grandPaid)+' đ  ·  còn '+vnd(R.grandDue)+' đ');
+
+  const box = document.getElementById('alertBox');
+  if(box){
+    if(R.warn.length){ box.className='alert bad show'; box.innerHTML = '⚠️ ' + [...new Set(R.warn)].join('<br>⚠️ '); }
+    else box.className='alert bad';
+  }
+  save();
+}
+
+/* =======================================================================
+   SỰ KIỆN
+   ======================================================================= */
+function setF(k,v,rerender){
+  const mo=activeMonth();
+  mo[k] = (k==='totalMode') ? v : num(v);
+  if(rerender){ save(); renderMain(); } else recalc();
+}
+function setR(r,k,v){ activeMonth().readings[r][k] = num(v); recalc(); }
+function setC(k,v){ activeMonth().config[k] = nz(num(v)); recalc(); }
+function setCR(g,r,v){ activeMonth().config[g][r] = nz(num(v)); recalc(); }
+function setTenant(r,v){ S.tenants[r]=v; save(); }
+function setPaid(r,v){ activeMonth().paid[r]=v; recalc(); }
+function switchMonth(id){ S.activeId=id; save(); renderTabs(); renderMain(); }
+
+function addMonth(){
+  const last = S.months[S.months.length-1];
+  let m,y;
+  if(last){ m = last.m===12?1:last.m+1; y = last.m===12?last.y+1:last.y; }
+  else { const n=new Date(); m=n.getMonth()+1; y=n.getFullYear(); }
+  const input = prompt('Tạo tab tháng mới (định dạng MM/YYYY):', String(m).padStart(2,'0')+'/'+y);
+  if(input===null) return;
+  const mm = input.match(/^(\d{1,2})\s*[\/\-.]\s*(\d{4})$/);
+  if(!mm){ alert('Sai định dạng. Ví dụ đúng: 09/2026'); return; }
+  m = parseInt(mm[1],10); y = parseInt(mm[2],10);
+  if(m<1||m>12){ alert('Tháng phải từ 1 đến 12.'); return; }
+  if(S.months.some(x=>x.m===m&&x.y===y)){ alert('Tháng này đã có tab rồi.'); return; }
+  const mo = newMonth(S,m,y);
+  S.months.push(mo);
+  S.months.sort((a,b)=> a.y-b.y || a.m-b.m);
+  S.activeId = mo.id;
+  save(); renderTabs(); renderMain();
+}
+function delMonth(){
+  const mo=activeMonth();
+  if(!confirm('Xóa hẳn '+label(mo)+'? Không khôi phục được.')) return;
+  S.months = S.months.filter(x=>x.id!==mo.id);
+  if(!S.months.length) S.months.push(newMonth(S,new Date().getMonth()+1,new Date().getFullYear()));
+  S.activeId = S.months[S.months.length-1].id;
+  save(); renderTabs(); renderMain();
+}
+
+/* Backup */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  a.href=URL.createObjectURL(blob);
+  a.download=`nha-tro-hieu-mai-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function importJSON(inp){
+  const f=inp.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const o=JSON.parse(rd.result);
+      if(!o.months||!o.months.length) throw 0;
+      if(!confirm('Nhập file này sẽ THAY THẾ toàn bộ dữ liệu đang có. Tiếp tục?')) return;
+      S=o; if(!S.months.some(x=>x.id===S.activeId)) S.activeId=S.months[S.months.length-1].id;
+      save(); renderTabs(); renderMain();
+      alert('Đã nhập xong '+S.months.length+' tháng.');
+    }catch(e){ alert('File không hợp lệ.'); }
+    inp.value='';
+  };
+  rd.readAsText(f);
+}
+
+/* =======================================================================
+   IN PHIẾU THU
+   ======================================================================= */
+function billHTML(r, mo, R){
+  const x=R.rooms[r], c=mo.config, d=mo.readings[r];
+  const row=(k,ct,v)=>`<tr><td>${k}</td><td>${ct}</td><td style="text-align:right">${vnd(v)}</td></tr>`;
+  const eCt = r===1
+    ? `Nhà tổng − 4 phòng = ${x.elec===null?'—':vnd(x.elec)} kWh × ${vnd(c.elecPrice)}`
+    : `${d.e1??'—'} − ${d.e0??'—'} = ${x.elec===null?'—':vnd(x.elec)} kWh × ${vnd(c.elecPrice)}`;
+  const wCt = r===1
+    ? `Nhà tổng − 4 phòng = ${x.water===null?'—':vnd(x.water)} m³ × ${vnd(c.waterPrice[r])}`
+    : `${d.w1??'—'} − ${d.w0??'—'} = ${x.water===null?'—':vnd(x.water)} m³ × ${vnd(c.waterPrice[r])}`;
+  const dd=new Date(), p=n=>String(n).padStart(2,'0');
+  return `<div class="bill">
+    <div class="hh">NHÀ TRỌ HIẾU MAI</div>
+    <h2>Phiếu thu tiền phòng</h2>
+    <div class="per">${label(mo)}</div>
+    <div class="meta"><div><b>Phòng ${r}</b></div><div>Người thuê: <b>${escapeHtml(S.tenants[r]||'.....................')}</b></div></div>
+    <table>
+      <thead><tr><th style="width:30%">Khoản mục</th><th>Chi tiết</th><th style="width:24%">Thành tiền (đ)</th></tr></thead>
+      <tbody>
+        ${row('Tiền thuê phòng','Theo hợp đồng',x.rent)}
+        ${row('Tiền rác','Cố định',x.trash)}
+        ${row('Tiền điện',eCt,x.elecMoney)}
+        ${row('Tiền nước',wCt,x.waterMoney)}
+        <tr class="tt"><td colspan="2">TỔNG CỘNG PHẢI THU</td><td style="text-align:right">${vnd(x.total)}</td></tr>
+      </tbody>
+    </table>
+    <div class="words">Bằng chữ: ${readVND(x.total)}.</div>
+    <div class="words">Trạng thái: <b>${mo.paid[r]?'ĐÃ THANH TOÁN':'CHƯA THANH TOÁN'}</b></div>
+    <div class="sign">
+      <div><i>Người thuê</i><i>(ký, ghi rõ họ tên)</i><b></b></div>
+      <div><i>Ngày ${p(dd.getDate())} tháng ${p(dd.getMonth()+1)} năm ${dd.getFullYear()}</i><i>Chủ nhà trọ</i><b></b></div>
+    </div>
+  </div>`;
+}
+function printOne(r){
+  const mo=activeMonth();
+  document.getElementById('printArea').innerHTML = billHTML(r,mo,compute(mo));
+  window.print();
+}
+function printAll(){
+  const mo=activeMonth(), R=compute(mo);
+  document.getElementById('printArea').innerHTML = ROOMS.map(r=>billHTML(r,mo,R)).join('');
+  window.print();
+}
+
+/* =======================================================================
+   CẦU NỐI ĐỒNG BỘ ĐÁM MÂY (được module Firebase phía dưới gọi vào)
+   ======================================================================= */
+function cloudStatus(kind, msg, btnLabel, btnFn){
+  const dot=document.getElementById('cloudDot'), m=document.getElementById('cloudMsg'), b=document.getElementById('cloudBtn');
+  if(!dot) return;
+  dot.className = 'dot ' + kind;
+  m.textContent = msg;
+  if(btnLabel){ b.style.display=''; b.textContent=btnLabel; b.onclick=btnFn; } else b.style.display='none';
+}
+/* Nhận dữ liệu từ đám mây → thay thế toàn bộ và vẽ lại */
+function applyRemote(obj){
+  if(!obj || !obj.months || !obj.months.length) return;
+  S = obj;
+  if(!S.months.some(x=>x.id===S.activeId)) S.activeId = S.months[S.months.length-1].id;
+  save({fromCloud:true});
+  renderTabs(); renderMain();
+}
+function snapshotState(){ return JSON.parse(JSON.stringify(S)); }
+function localUpdatedAt(){ return S.updatedAt || 0; }
+
+/* Nếu 10 giây mà thư viện đám mây chưa nạp được (mạng chặn CDN) thì báo rõ */
+window.cloudBooted = false;
+setTimeout(()=>{ if(!window.cloudBooted)
+  cloudStatus('err','Không tải được thư viện đám mây — dữ liệu chỉ lưu trên máy này','Tải lại',()=>location.reload());
+}, 10000);
+
+/* Khởi động */
+renderTabs(); renderMain();
+</script>
+
+<!-- =========================================================================
+     ĐỒNG BỘ ĐÁM MÂY — Firebase Firestore + đăng nhập Google
+     ========================================================================= -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot }
+  from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBENE8ODLxBGw7W-4fj5bS_wE-kg36X0QY",
+  authDomain: "nha-tro-hieu-mai-app.firebaseapp.com",
+  projectId: "nha-tro-hieu-mai-app",
+  storageBucket: "nha-tro-hieu-mai-app.firebasestorage.app",
+  messagingSenderId: "347732097780",
+  appId: "1:347732097780:web:196822f4d7649c8e623ca1"
+};
+const DOC_PATH = ['nhatro','hieumai'];
+window.cloudBooted = true;
+
+if(!firebaseConfig || !firebaseConfig.apiKey){
+  cloudStatus('off','Chưa bật đám mây — chỉ lưu trên máy này');
+} else {
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const ref  = doc(db, DOC_PATH[0], DOC_PATH[1]);
+  const CID  = Math.random().toString(36).slice(2,10);   // nhận diện chính máy này
+  let user = null, unsub = null, timer = null, pushing = false;
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const doLogin  = () => signInWithPopup(auth, provider).catch(e=>{
+      cloudStatus('err','Đăng nhập lỗi: '+(e.code||e.message), 'Thử lại', doLogin); });
+  const doLogout = () => signOut(auth);
+
+  cloudStatus('sync','Đang kiểm tra đăng nhập…');
+
+  onAuthStateChanged(auth, async u=>{
+    user = u;
+    if(unsub){ unsub(); unsub = null; }
+    if(!u){
+      cloudStatus('off','Chưa đăng nhập — dữ liệu chỉ nằm trên máy này','Đăng nhập Google',doLogin);
+      return;
+    }
+    cloudStatus('sync','Đang tải dữ liệu đám mây…');
+    try{
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const remote = JSON.parse(snap.data().payload || 'null');
+        const rAt = (remote && remote.updatedAt) || 0;
+        if(rAt >= localUpdatedAt()) applyRemote(remote); else await push(true);
+      }else{
+        await push(true);
+      }
+      listen();
+      ok();
+    }catch(e){
+      cloudStatus('err','Không đọc được đám mây: '+(e.code||e.message),'Thử lại',()=>location.reload());
+    }
+  });
+
+  function ok(){
+    const t = new Date();
+    const p = n=>String(n).padStart(2,'0');
+    cloudStatus('on','Đã đồng bộ '+p(t.getHours())+':'+p(t.getMinutes())+' · '+(user.email||''),'Thoát',doLogout);
+  }
+
+  function listen(){
+    unsub = onSnapshot(ref, snap=>{
+      if(!snap.exists() || snap.metadata.hasPendingWrites) return;
+      const d = snap.data();
+      if(d.cid === CID) return;                       // thay đổi do chính máy này gửi lên
+      try{
+        const remote = JSON.parse(d.payload || 'null');
+        if(remote && (remote.updatedAt||0) > localUpdatedAt()){ applyRemote(remote); ok(); }
+      }catch(e){}
+    }, e=>cloudStatus('err','Mất kết nối: '+(e.code||e.message),'Tải lại',()=>location.reload()));
+  }
+
+  async function push(silent){
+    if(!user) return;
+    pushing = true;
+    if(!silent) cloudStatus('sync','Đang lưu lên đám mây…');
+    try{
+      await setDoc(ref, { payload: JSON.stringify(snapshotState()), cid: CID, at: Date.now(), by: user.email||'' });
+      ok();
+    }catch(e){
+      cloudStatus('err','Lưu đám mây lỗi: '+(e.code||e.message),'Thử lại',()=>push(false));
+    }
+    pushing = false;
+  }
+
+  /* Gom nhiều lần gõ thành 1 lần ghi */
+  window.cloudPush = function(){
+    if(!user) return;
+    cloudStatus('sync','Đang lưu…','Thoát',doLogout);
+    clearTimeout(timer);
+    timer = setTimeout(()=>push(false), 1200);
+  };
+  window.addEventListener('beforeunload', ()=>{ if(timer){ clearTimeout(timer); push(true); } });
+}
+</script>
+</body>
+</html>
