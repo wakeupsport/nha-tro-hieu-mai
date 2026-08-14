@@ -220,9 +220,15 @@ function load(){
     return o;
   }catch(e){ return null; }
 }
+/* Chỉ đóng dấu thời gian khi CHÍNH NGƯỜI DÙNG sửa dữ liệu.
+   Nếu không có cờ này, một máy mới mở lần đầu (bảng trống) sẽ bị coi là
+   "mới hơn" đám mây và ghi đè mất số liệu thật. */
+let userEdited = false;
+function touched(){ userEdited = true; }
+
 let saveWarned = false;
 function save(opts){
-  if(!(opts && opts.fromCloud)){
+  if(!(opts && opts.fromCloud) && userEdited){
     S.updatedAt = Date.now();
     if(window.cloudPush) window.cloudPush();
   }
@@ -497,16 +503,17 @@ function recalc(){
    SỰ KIỆN
    ======================================================================= */
 function setF(k,v,rerender){
+  touched();
   const mo=activeMonth();
   mo[k] = (k==='totalMode') ? v : num(v);
   if(rerender){ save(); renderMain(); } else recalc();
 }
-function setR(r,k,v){ activeMonth().readings[r][k] = num(v); recalc(); }
-function setC(k,v){ activeMonth().config[k] = nz(num(v)); recalc(); }
-function setCR(g,r,v){ activeMonth().config[g][r] = nz(num(v)); recalc(); }
-function setTenant(r,v){ S.tenants[r]=v; save(); }
-function setPaid(r,v){ activeMonth().paid[r]=v; recalc(); }
-function switchMonth(id){ S.activeId=id; save(); renderTabs(); renderMain(); }
+function setR(r,k,v){ touched(); activeMonth().readings[r][k] = num(v); recalc(); }
+function setC(k,v){ touched(); activeMonth().config[k] = nz(num(v)); recalc(); }
+function setCR(g,r,v){ touched(); activeMonth().config[g][r] = nz(num(v)); recalc(); }
+function setTenant(r,v){ touched(); S.tenants[r]=v; save(); }
+function setPaid(r,v){ touched(); activeMonth().paid[r]=v; recalc(); }
+function switchMonth(id){ S.activeId=id; renderTabs(); renderMain(); }
 
 function addMonth(){
   const last = S.months[S.months.length-1];
@@ -520,6 +527,7 @@ function addMonth(){
   m = parseInt(mm[1],10); y = parseInt(mm[2],10);
   if(m<1||m>12){ alert('Tháng phải từ 1 đến 12.'); return; }
   if(S.months.some(x=>x.m===m&&x.y===y)){ alert('Tháng này đã có tab rồi.'); return; }
+  touched();
   const mo = newMonth(S,m,y);
   S.months.push(mo);
   S.months.sort((a,b)=> a.y-b.y || a.m-b.m);
@@ -529,6 +537,7 @@ function addMonth(){
 function delMonth(){
   const mo=activeMonth();
   if(!confirm('Xóa hẳn '+label(mo)+'? Không khôi phục được.')) return;
+  touched();
   S.months = S.months.filter(x=>x.id!==mo.id);
   if(!S.months.length) S.months.push(newMonth(S,new Date().getMonth()+1,new Date().getFullYear()));
   S.activeId = S.months[S.months.length-1].id;
@@ -552,6 +561,7 @@ function importJSON(inp){
       const o=JSON.parse(rd.result);
       if(!o.months||!o.months.length) throw 0;
       if(!confirm('Nhập file này sẽ THAY THẾ toàn bộ dữ liệu đang có. Tiếp tục?')) return;
+      touched();
       S=o; if(!S.months.some(x=>x.id===S.activeId)) S.activeId=S.months[S.months.length-1].id;
       save(); renderTabs(); renderMain();
       alert('Đã nhập xong '+S.months.length+' tháng.');
