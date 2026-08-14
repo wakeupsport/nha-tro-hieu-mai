@@ -644,7 +644,7 @@ renderTabs(); renderMain();
      ========================================================================= -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot }
   from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
@@ -673,9 +673,25 @@ if(!firebaseConfig || !firebaseConfig.apiKey){
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
-  const doLogin  = () => signInWithPopup(auth, provider).catch(e=>{
-      cloudStatus('err','Đăng nhập lỗi: '+(e.code||e.message), 'Thử lại', doLogin); });
+  /* Mở cửa sổ popup; nếu trình duyệt chặn (hay dùng trên điện thoại) thì chuyển
+     sang kiểu chuyển trang — cách này chạy được trên mọi thiết bị. */
+  const doLogin = async () => {
+    try{
+      await signInWithPopup(auth, provider);
+    }catch(e){
+      const fallback = ['auth/popup-blocked','auth/popup-closed-by-user',
+        'auth/cancelled-popup-request','auth/operation-not-supported-in-this-environment'];
+      if(fallback.includes(e.code)){
+        cloudStatus('sync','Đang chuyển sang trang đăng nhập Google…');
+        try{ await signInWithRedirect(auth, provider); }
+        catch(e2){ cloudStatus('err','Đăng nhập lỗi: '+(e2.code||e2.message),'Thử lại',doLogin); }
+      }else{
+        cloudStatus('err','Đăng nhập lỗi: '+(e.code||e.message),'Thử lại',doLogin);
+      }
+    }
+  };
   const doLogout = () => signOut(auth);
+  getRedirectResult(auth).catch(()=>{});
 
   cloudStatus('sync','Đang kiểm tra đăng nhập…');
 
